@@ -1,0 +1,23 @@
+{
+  "name": "diagram-creator",
+  "owner": {
+    "name": "Ferdinando Bons",
+    "url": "https://github.com/ferdinandobons"
+  },
+  "metadata": {
+    "description": "Turn any input into beautiful, production-ready architecture diagrams — self-contained HTML files with dark theme, animations, and zero dependencies",
+    "version": "1.0.0",
+    "repository": "https://github.com/ferdinandobons/diagram-creator-skill"
+  },
+  "plugins": [
+    {
+      "name": "diagram-creator",
+      "description": "Generate stunning architecture diagrams from any file type or text description. Supports 4 topologies: nested, left-to-right, hub-and-spoke, timeline.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/diagram-creator"
+      ]
+    }
+  ]
+}
