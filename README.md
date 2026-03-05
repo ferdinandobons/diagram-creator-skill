@@ -27,7 +27,8 @@ The skill processes **any file type**. It reads the content, understands the str
 | **YAML** | `.yaml`, `.yml` | Same as JSON — hierarchical structure mapped to diagram layers |
 | **Code files** | `.py`, `.ts`, `.js`, `.go`, `.rs`, `.java`, `.rb`, `.php`, `.swift`, `.kt`, `.c`, `.cpp`, `.cs`, `.scala`, `.ex`, `.clj` | Extracts classes, functions, imports, inheritance — diagrams the architecture |
 | **Config files** | `.toml`, `.ini`, `.cfg`, `.env`, `.tf`, `.hcl`, `Dockerfile`, `docker-compose.yml`, `Makefile`, `Procfile`, `.nginx.conf` | Maps services, variables, dependencies, infrastructure |
-| **Data files** | `.csv`, `.tsv`, `.xlsx`, `.parquet` | Identifies columns as entities, rows as relationships |
+| **Data files** | `.csv`, `.tsv`, `.parquet` | Identifies columns as entities, rows as relationships |
+| **Microsoft Office** | `.xlsx`, `.xls`, `.docx`, `.doc`, `.pptx`, `.ppt` | Extracts tables, headings, slide structure, org charts, SmartArt |
 | **API specs** | `.openapi.yaml`, `.swagger.json`, `.graphql`, `.proto`, `.thrift` | Extracts endpoints, types, relationships between services |
 | **Database** | `.sql`, `.prisma`, `.schema`, `.dbml` | Maps tables, columns, foreign keys, relationships |
 | **Infra / CI/CD** | `.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, `bitbucket-pipelines.yml`, `k8s/*.yaml` | Visualizes pipeline stages, deployment flows, service topology |

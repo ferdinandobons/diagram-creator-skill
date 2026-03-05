@@ -23,7 +23,8 @@ Accept any of these inputs and auto-process them:
 | **API specs** (.openapi.yaml, .swagger.json, .graphql, .proto) | Extract endpoints, types, service relationships |
 | **Database schemas** (.sql, .prisma, .dbml) | Map tables, columns, foreign keys, relationships |
 | **CI/CD pipelines** (.github/workflows/*.yml, .gitlab-ci.yml, Jenkinsfile) | Visualize pipeline stages and deployment flows |
-| **Data files** (.csv, .tsv, .xlsx) | Identify columns as entities, rows as relationships |
+| **Data files** (.csv, .tsv) | Identify columns as entities, rows as relationships |
+| **Microsoft Office** (.xlsx, .xls, .docx, .doc, .pptx, .ppt) | Extract tables, headings, slide structure, org charts, SmartArt |
 | **Package manifests** (package.json, requirements.txt, Cargo.toml, go.mod, pom.xml) | Map dependency trees |
 | **Existing diagrams** (.drawio, .puml, .mermaid) | Read spec and re-render with this design system |
 | **PDF / Docs** (.pdf, .txt, .rst, .adoc) | Read content, extract core structure |
