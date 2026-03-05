@@ -215,3 +215,329 @@ font-size: 0.65rem; font-weight: 700; color: var(--blue);
 .badge-pending { background: rgba(74,96,128,0.12);  color: var(--dim);   border: 1px solid rgba(74,96,128,0.3); }
 ```
 All badges: `border-radius: 4px`, `padding: 2px 8px`, `font-size: 0.62rem`
+
+---
+
+## Grid / Matrix
+
+Comparison tables, feature matrices, skill maps, competitive landscapes.
+
+### Container
+```css
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+```
+For explicit column counts (e.g., a 3-column comparison): use `grid-template-columns: repeat(N, 1fr)`.
+
+### Column headers (optional)
+```css
+.grid-header {
+  background: rgba([accent-rgb], 0.08);
+  border: 1px solid rgba([accent-rgb], 0.25);
+  border-radius: 10px;
+  padding: 12px 16px;
+  text-align: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: white;
+}
+```
+
+### Grid cells
+Use the standard `.node-card` style. Each cell contains:
+1. Emoji (optional)
+2. Name/label (Syne 700)
+3. Value or description (JetBrains Mono, 0.7rem)
+4. Optional badge
+
+### Category row (spans full width)
+```css
+.grid-category {
+  grid-column: 1 / -1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--dim);
+  padding: 8px 0 4px;
+  border-bottom: 1px solid var(--border);
+  margin-top: 8px;
+}
+```
+
+### Highlighted cells
+For cells that need emphasis (e.g., "best option", "recommended"):
+```css
+.grid-highlight {
+  border-color: var(--green);
+  background: rgba(0,229,160,0.06);
+}
+```
+
+---
+
+## Tree / Org Chart
+
+Organizational hierarchies, file trees, decision trees, taxonomy.
+
+### Layout approach
+Use nested `<ul>` lists styled as a vertical tree with connecting lines.
+
+### Container
+```css
+.tree {
+  position: relative;
+  width: 100%;
+  padding-left: 0;
+}
+.tree ul {
+  list-style: none;
+  padding-left: 28px;
+  position: relative;
+}
+```
+
+### Tree connectors (CSS-only, no SVG)
+```css
+.tree li {
+  position: relative;
+  padding: 6px 0 6px 20px;
+}
+/* vertical line */
+.tree li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+/* horizontal branch */
+.tree li::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18px;
+  width: 16px;
+  height: 1px;
+  background: var(--border);
+}
+/* hide vertical line after last child */
+.tree li:last-child::before {
+  bottom: calc(100% - 18px);
+}
+```
+
+### Tree node card
+```css
+.tree-node {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  transition: border-color 0.2s;
+}
+.tree-node:hover { border-color: var(--cyan); }
+```
+
+Internal structure: emoji + name (Syne 700) + optional role/detail (JetBrains Mono, dim)
+
+### Depth-based accent colors
+- Level 0 (root): `border-left: 3px solid var(--red)`
+- Level 1: `border-left: 3px solid var(--orange)`
+- Level 2: `border-left: 3px solid var(--blue)`
+- Level 3+: `border-left: 3px solid var(--cyan)`
+
+---
+
+## Funnel
+
+Sales funnels, conversion pipelines, filtering processes, data reduction.
+
+### Layout
+A vertical stack of progressively narrower boxes, centered.
+
+### Container
+```css
+.funnel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+}
+```
+
+### Funnel stages
+```css
+.funnel-stage {
+  position: relative;
+  text-align: center;
+  padding: 16px 24px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  transition: transform 0.2s;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.funnel-stage:hover { transform: scale(1.02); }
+```
+
+### Width progression (N stages)
+Each stage gets progressively narrower. Calculate widths:
+```
+Stage 1 (top):    width: 100%
+Stage 2:          width: 85%
+Stage 3:          width: 70%
+Stage 4:          width: 55%
+Stage 5 (bottom): width: 40%
+```
+Formula: `width = 100% - ((index / (N-1)) * 60%)`
+Minimum width: 35%.
+
+### Stage styling
+Each stage gets a background with the accent color at low opacity:
+```css
+background: rgba([accent-rgb], 0.08);
+border: 1px solid rgba([accent-rgb], 0.25);
+```
+
+Color progression top-to-bottom: red → orange → blue → cyan → green
+
+### Conversion arrows between stages
+```css
+.funnel-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px 0;
+}
+```
+Arrow line: `width: 2px`, `height: 16px`, gradient.
+Arrowhead: `content: '▼'`.
+
+### Conversion rate labels (optional)
+Between stages, show percentage:
+```css
+.conversion-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--dim);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+```
+
+---
+
+## Comparison / VS
+
+Side-by-side comparison of 2-3 options. Product comparisons, technology choices, before/after.
+
+### Layout
+```css
+.comparison {
+  display: grid;
+  grid-template-columns: repeat(N, 1fr);  /* N = number of items being compared */
+  gap: 20px;
+  width: 100%;
+}
+```
+Max 3 columns. On mobile (`max-width: 600px`): stack to `grid-template-columns: 1fr`.
+
+### Column card
+```css
+.compare-column {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+```
+
+### Column header
+```css
+.compare-header {
+  text-align: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+```
+Contains: emoji (1.6rem) + name (Syne 800, 1rem) + subtitle (JetBrains Mono, dim)
+
+### Highlighted (recommended) column
+```css
+.compare-column.recommended {
+  border-color: var(--cyan);
+  box-shadow: 0 0 20px rgba(0,212,255,0.1);
+}
+.compare-column.recommended::before {
+  content: 'RECOMMENDED';
+  display: block;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+```
+
+### Feature rows inside columns
+```css
+.compare-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(30,45,74,0.4);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+}
+.compare-row:last-child { border-bottom: none; }
+.compare-label { color: var(--dim); }
+.compare-value { color: var(--text); font-weight: 600; }
+```
+
+### VS divider (between 2 columns)
+```css
+.vs-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg);
+  border: 2px solid var(--orange);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 0.7rem;
+  color: var(--orange);
+  z-index: 3;
+}
+```
+Only show VS badge when comparing exactly 2 items. For 3+ items, omit it.

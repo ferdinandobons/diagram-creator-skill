@@ -1,6 +1,6 @@
 # Diagram Creator — Claude Code Skill
 
-Turn any input into beautiful, production-ready architecture diagrams. Self-contained HTML files with dark theme, professional typography, smooth animations, and zero dependencies.
+Turn any input into beautiful, production-ready diagrams on an infinite canvas. Self-contained HTML files with 5 themes, 8 topology layouts, pan & zoom navigation, professional typography, smooth animations, and zero dependencies.
 
 Built by [Ferdinando Bons](https://github.com/ferdinandobons).
 
@@ -30,7 +30,7 @@ Give it a topic, a description, or **any file** — and it generates a polished 
 | **PDF** (.pdf) | Reads content, extracts core structure |
 | **Plain text** (.txt) | Parses as free-form description |
 
-## 4 Topology Layouts
+## 8 Topology Layouts
 
 | Layout | Best for | Examples |
 |---|---|---|
@@ -38,15 +38,31 @@ Give it a topic, a description, or **any file** — and it generates a polished 
 | **Left-to-right** | Sequential flows | OAuth flow, CI/CD pipeline, user journey |
 | **Hub-and-spoke** | Central node + surrounding nodes | API gateway, microservices, load balancer |
 | **Timeline** | Ordered vertical steps | Deploy pipeline, project roadmap, historical events |
+| **Grid / Matrix** | Comparison tables, feature grids | Feature comparison, skill map, competitive landscape |
+| **Tree / Org Chart** | Hierarchical branching | Org chart, file tree, decision tree, taxonomy |
+| **Funnel** | Progressive narrowing | Sales funnel, conversion pipeline, data filtering |
+| **Comparison / VS** | Side-by-side 2-3 options | Product vs product, tech choices, before/after |
+
+## 5 Themes
+
+| Theme | Best for |
+|---|---|
+| **Dark** (default) | Technical diagrams, dev docs, README screenshots |
+| **Light** | Presentations, documentation sites, print-friendly |
+| **Corporate** | Business plans, pitch decks, stakeholder presentations |
+| **Neon** | Creative projects, gaming, social media screenshots |
+| **Minimal** | Clean documentation, technical specs |
 
 ## Output Features
 
-- Dark theme with professional typography (Syne + JetBrains Mono)
+- **Infinite canvas** — pan (click+drag) and zoom (scroll wheel) like Miro/draw.io
+- Professional typography (Syne + JetBrains Mono)
 - Animated connections and entrance effects
 - Fully responsive (works down to 360px)
 - Single HTML file, zero external dependencies
 - Color-coded layers with auto-generated legends
 - Hover effects on all interactive elements
+- Keyboard shortcuts: `+` zoom in, `-` zoom out, `0` reset
 
 ## Installation
 
@@ -112,8 +128,10 @@ diagram-creator-skill/
 │       ├── SKILL.md             # Core skill instructions
 │       ├── references/
 │       │   ├── typography-and-colors.md   # Fonts, palette, background
-│       │   ├── topology-layouts.md        # Layout rules per topology
+│       │   ├── themes.md                  # 5 color themes (dark, light, corporate, neon, minimal)
+│       │   ├── topology-layouts.md        # Layout rules for all 8 topologies
 │       │   ├── components.md              # Cards, badges, callouts, animations
+│       │   ├── canvas.md                  # Infinite canvas with pan & zoom
 │       │   └── safety-rules.md            # Mandatory layout constraints
 │       └── examples/
 │           ├── oauth2-flow.md             # Left-to-right example
