@@ -72,7 +72,9 @@ npx skills add ferdinandobons/diagram-creator-skill
 
 ### Option 2: Claude Code Plugin
 
-```bash
+From inside a Claude Code session:
+
+```
 /plugin marketplace add ferdinandobons/diagram-creator-skill
 /plugin install diagram-creator
 ```
