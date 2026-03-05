@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes Pod Networking</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap');
+
+:root {
+  --bg:     #0a0e1a;
+  --panel:  #0f1528;
+  --border: #1e2d4a;
+  --blue:   #2d7aff;
+  --cyan:   #00d4ff;
+  --green:  #00e5a0;
+  --orange: #ff8c42;
+  --red:    #ff4d6a;
+  --text:   #c8d8f0;
+  --dim:    #4a6080;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  min-height: 100vh;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+  padding: 0;
+  justify-content: flex-start;
+  align-items: flex-start;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(45,122,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45,122,255,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#canvas-container { position: fixed; inset: 0; overflow: hidden; cursor: grab; z-index: 1; }
+#canvas-container.grabbing { cursor: grabbing; }
+#canvas { position: absolute; transform-origin: 0 0; }
+
+.wrapper { position: relative; z-index: 1; width: 100%; max-width: 900px; overflow-x: auto; min-width: 320px; padding: 40px 20px; }
+
+h1 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: #fff; text-align: center; margin-bottom: 6px; }
+h1 .highlight { color: var(--cyan); }
+.subtitle { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dim); text-align: center; margin-bottom: 32px; }
+
+.layer { border-radius: 16px; padding: 20px 24px; min-height: 80px; }
+.layer-1 { background: rgba(255,77,106,0.06); border: 1px solid rgba(255,77,106,0.22); }
+.layer-2 { background: rgba(255,140,66,0.06); border: 1px solid rgba(255,140,66,0.22); margin: 12px 0 0; }
+.layer-3 { background: rgba(45,122,255,0.06); border: 1px solid rgba(45,122,255,0.22); margin: 12px 0 0; }
+.layer-4 { background: rgba(0,212,255,0.06); border: 1px dashed rgba(0,212,255,0.22); margin: 12px 0 0; }
+
+.layer-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text); margin-bottom: 14px; }
+.layer-label-red::before, .layer-label-orange::before, .layer-label-blue::before, .layer-label-cyan::before {
+  content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 8px; vertical-align: middle;
+}
+.layer-label-red::before { background: var(--red); box-shadow: 0 0 8px var(--red); }
+.layer-label-orange::before { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+.layer-label-blue::before { background: var(--blue); box-shadow: 0 0 8px var(--blue); }
+.layer-label-cyan::before { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+
+.ext-client { background: rgba(255,77,106,0.08); border: 1px solid rgba(255,77,106,0.25); border-radius: 10px; padding: 10px 18px; font-size: 0.75rem; color: var(--red); text-align: center; margin-bottom: 8px; }
+.ext-client span { display: block; color: var(--dim); font-size: 0.62rem; margin-top: 2px; }
+
+.connector { display: flex; flex-direction: column; align-items: center; margin: 0 auto; padding: 4px 0; }
+.connector-line { width: 2px; height: 28px; background: linear-gradient(to bottom, var(--dim), var(--blue)); }
+.connector-arrow { color: var(--blue); font-size: 10px; line-height: 1; }
+.connector-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; color: var(--dim); margin-top: 4px; }
+
+.bus-line { height: 3px; background: linear-gradient(to right, transparent, var(--blue), var(--cyan), var(--blue), transparent); border-radius: 2px; margin: 12px 0 8px; animation: pulse-glow 2.5s ease-in-out infinite; }
+
+.drops-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin: 0; }
+.drop { display: flex; justify-content: center; }
+.drop-line { width: 1px; height: 16px; background: linear-gradient(to bottom, var(--cyan), transparent); }
+
+.node-row { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: stretch; }
+
+.node-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; flex: 1; min-width: 140px; max-width: 150px; transition: border-color 0.2s; z-index: 2; }
+.node-card:hover { border-color: var(--cyan); }
+.node-emoji { display: block; font-size: 1.4rem; margin-bottom: 8px; }
+.node-name { font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 700; color: #fff; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.node-detail { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--cyan); margin-bottom: 4px; }
+.node-note { font-size: 0.62rem; color: var(--dim); }
+
+.badge-port { display: inline-block; background: rgba(0,229,160,0.12); color: var(--green); border: 1px solid rgba(0,229,160,0.3); border-radius: 4px; padding: 2px 6px; font-size: 0.62rem; margin-top: 4px; }
+.badge-mechanism { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,140,66,0.12); border: 1px solid rgba(255,140,66,0.35); color: var(--orange); border-radius: 8px; padding: 6px 14px; font-size: 0.72rem; font-weight: 600; }
+
+.callout { background: rgba(0,212,255,0.05); border: 1px solid rgba(0,212,255,0.2); border-radius: 10px; padding: 12px 18px; font-size: 0.72rem; color: var(--text); text-align: center; margin-top: 12px; }
+.callout strong { color: var(--cyan); }
+
+.legend { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-top: 28px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.65rem; color: var(--dim); letter-spacing: 0.05em; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 6px rgba(45,122,255,0.3); } 50% { box-shadow: 0 0 16px rgba(0,212,255,0.7); } }
+.anim-1 { animation: fadeUp 0.5s ease both; animation-delay: 0.1s; }
+.anim-2 { animation: fadeUp 0.5s ease both; animation-delay: 0.2s; }
+.anim-3 { animation: fadeUp 0.5s ease both; animation-delay: 0.3s; }
+.anim-4 { animation: fadeUp 0.5s ease both; animation-delay: 0.4s; }
+.anim-5 { animation: fadeUp 0.5s ease both; animation-delay: 0.5s; }
+
+.canvas-controls { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 4px; z-index: 10; }
+.canvas-controls button { width: 36px; height: 36px; border: 1px solid var(--border); background: var(--panel); color: var(--text); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, background 0.2s; }
+.canvas-controls button:hover { border-color: var(--cyan); background: rgba(0,212,255,0.08); }
+#zoom-reset { width: auto; padding: 0 12px; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; }
+
+@media (max-width: 600px) {
+  .node-card { min-width: 120px; max-width: 100%; }
+  .drops-row { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+  <div id="canvas-container">
+    <div id="canvas" class="wrapper">
+
+      <h1 class="anim-1">Kubernetes <span class="highlight">Pod Networking</span></h1>
+      <div class="subtitle anim-1">Cluster &rarr; Node &rarr; Pod Network &rarr; Containers</div>
+
+      <div class="layer layer-1 anim-2">
+        <div class="layer-label layer-label-red">Internet &middot; External Traffic</div>
+        <div class="ext-client">&#x1F310; External Client<span>HTTPS on port 443</span></div>
+
+        <div class="connector">
+          <div class="connector-line"></div>
+          <div class="connector-arrow">&#x25BC;</div>
+          <div class="connector-label">HTTPS :443</div>
+        </div>
+
+        <div class="layer layer-2 anim-3">
+          <div class="layer-label layer-label-orange">Kubernetes Cluster</div>
+          <div style="text-align:center;margin-bottom:8px;">
+            <div class="badge-mechanism">&#x2699;&#xFE0F; kube-proxy iptables / IPVS rules</div>
+          </div>
+
+          <div class="connector">
+            <div class="connector-line"></div>
+            <div class="connector-arrow">&#x25BC;</div>
+            <div class="connector-label">kube-proxy routing</div>
+          </div>
+
+          <div class="layer layer-3 anim-4">
+            <div class="layer-label layer-label-blue">Worker Node</div>
+
+            <div class="connector">
+              <div class="connector-line"></div>
+              <div class="connector-arrow">&#x25BC;</div>
+              <div class="connector-label">CNI &middot; CIDR 10.244.0.0/16</div>
+            </div>
+
+            <div class="layer layer-4 anim-5">
+              <div class="layer-label layer-label-cyan">Pod Network &middot; CNI - Calico</div>
+              <div class="bus-line"></div>
+              <div class="drops-row">
+                <div class="drop"><div class="drop-line"></div></div>
+                <div class="drop"><div class="drop-line"></div></div>
+                <div class="drop"><div class="drop-line"></div></div>
+                <div class="drop"><div class="drop-line"></div></div>
+                <div class="drop"><div class="drop-line"></div></div>
+              </div>
+              <div class="node-row">
+                <div class="node-card">
+                  <span class="node-emoji">&#x1F6E1;&#xFE0F;</span>
+                  <div class="node-name">nginx-ingress</div>
+                  <div class="node-detail">10.244.0.5</div>
+                  <div class="node-note">Ingress controller</div>
+                  <div class="badge-port">:80 &rarr; 30080</div>
+                </div>
+                <div class="node-card">
+                  <span class="node-emoji">&#x2699;&#xFE0F;</span>
+                  <div class="node-name">api-server</div>
+                  <div class="node-detail">10.244.0.12</div>
+                  <div class="node-note">Backend API</div>
+                  <div class="badge-port">:8080</div>
+                </div>
+                <div class="node-card">
+                  <span class="node-emoji">&#x1F5C4;&#xFE0F;</span>
+                  <div class="node-name">postgres</div>
+                  <div class="node-detail">10.244.0.20</div>
+                  <div class="node-note">StatefulSet + PVC</div>
+                  <div class="badge-port">:5432</div>
+                </div>
+                <div class="node-card">
+                  <span class="node-emoji">&#x26A1;</span>
+                  <div class="node-name">redis-cache</div>
+                  <div class="node-detail">10.244.0.25</div>
+                  <div class="node-note">internal only</div>
+                </div>
+                <div class="node-card">
+                  <span class="node-emoji">&#x1F4CA;</span>
+                  <div class="node-name">prometheus</div>
+                  <div class="node-detail">10.244.0.30</div>
+                  <div class="node-note">Monitoring</div>
+                  <div class="badge-port">:9090 &rarr; 30090</div>
+                </div>
+              </div>
+              <div class="callout">&#x1F504; Pods communicate via <strong>virtual switch</strong> &mdash; direct pod-to-pod traffic within the CNI overlay</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red);box-shadow:0 0 6px var(--red)"></div>External</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--orange);box-shadow:0 0 6px var(--orange)"></div>Cluster boundary</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--blue);box-shadow:0 0 6px var(--blue)"></div>Worker node</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cyan);box-shadow:0 0 6px var(--cyan)"></div>Pod network</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green);box-shadow:0 0 6px var(--green)"></div>Exposed port</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="canvas-controls">
+    <button id="zoom-in" title="Zoom in">+</button>
+    <button id="zoom-reset" title="Reset view">Reset</button>
+    <button id="zoom-out" title="Zoom out">&minus;</button>
+  </div>
+
+<script>
+(function() {
+  var container = document.getElementById('canvas-container');
+  var canvas = document.getElementById('canvas');
+  var scale = 1, translateX = 0, translateY = 0, isPanning = false, startX, startY;
+  var MIN_SCALE = 0.2, MAX_SCALE = 3, ZOOM_STEP = 0.1;
+
+  function applyTransform() { canvas.style.transform = 'translate(' + translateX + 'px,' + translateY + 'px) scale(' + scale + ')'; }
+  function centerCanvas() {
+    var cw = container.clientWidth, ch = container.clientHeight;
+    var dw = canvas.scrollWidth * scale, dh = canvas.scrollHeight * scale;
+    translateX = Math.max(0, (cw - dw) / 2);
+    translateY = Math.max(20, (ch - dh) / 2);
+    applyTransform();
+  }
+  requestAnimationFrame(function() { requestAnimationFrame(centerCanvas); });
+
+  container.addEventListener('mousedown', function(e) { if (e.button !== 0) return; isPanning = true; startX = e.clientX - translateX; startY = e.clientY - translateY; container.classList.add('grabbing'); });
+  window.addEventListener('mousemove', function(e) { if (!isPanning) return; translateX = e.clientX - startX; translateY = e.clientY - startY; applyTransform(); });
+  window.addEventListener('mouseup', function() { isPanning = false; container.classList.remove('grabbing'); });
+
+  container.addEventListener('touchstart', function(e) { if (e.touches.length === 1) { isPanning = true; startX = e.touches[0].clientX - translateX; startY = e.touches[0].clientY - translateY; } }, { passive: true });
+  container.addEventListener('touchmove', function(e) { if (!isPanning || e.touches.length !== 1) return; translateX = e.touches[0].clientX - startX; translateY = e.touches[0].clientY - startY; applyTransform(); }, { passive: true });
+  container.addEventListener('touchend', function() { isPanning = false; });
+
+  container.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    var rect = container.getBoundingClientRect(), mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top, prevScale = scale;
+    scale = e.deltaY < 0 ? Math.min(MAX_SCALE, scale + ZOOM_STEP) : Math.max(MIN_SCALE, scale - ZOOM_STEP);
+    var ratio = scale / prevScale;
+    translateX = mouseX - ratio * (mouseX - translateX); translateY = mouseY - ratio * (mouseY - translateY);
+    applyTransform();
+  }, { passive: false });
+
+  document.getElementById('zoom-in').addEventListener('click', function() { scale = Math.min(MAX_SCALE, scale + ZOOM_STEP); applyTransform(); });
+  document.getElementById('zoom-out').addEventListener('click', function() { scale = Math.max(MIN_SCALE, scale - ZOOM_STEP); applyTransform(); });
+  document.getElementById('zoom-reset').addEventListener('click', function() { scale = 1; centerCanvas(); });
+
+  window.addEventListener('keydown', function(e) {
+    if (e.key === '=' || e.key === '+') { scale = Math.min(MAX_SCALE, scale + ZOOM_STEP); applyTransform(); }
+    if (e.key === '-') { scale = Math.max(MIN_SCALE, scale - ZOOM_STEP); applyTransform(); }
+    if (e.key === '0') { scale = 1; centerCanvas(); }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaaS Microservices Architecture</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap');
+
+:root {
+  --bg:     #0a0e1a;
+  --panel:  #0f1528;
+  --border: #1e2d4a;
+  --blue:   #2d7aff;
+  --cyan:   #00d4ff;
+  --green:  #00e5a0;
+  --orange: #ff8c42;
+  --red:    #ff4d6a;
+  --text:   #c8d8f0;
+  --dim:    #4a6080;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  min-height: 100vh;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+  padding: 0;
+  justify-content: flex-start;
+  align-items: flex-start;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(45,122,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45,122,255,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#canvas-container { position: fixed; inset: 0; overflow: hidden; cursor: grab; z-index: 1; }
+#canvas-container.grabbing { cursor: grabbing; }
+#canvas { position: absolute; transform-origin: 0 0; }
+.wrapper { position: relative; z-index: 1; width: 100%; max-width: 900px; overflow-x: auto; min-width: 320px; padding: 40px 20px; }
+
+h1 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: #fff; text-align: center; margin-bottom: 6px; }
+h1 .highlight { color: var(--cyan); }
+.subtitle { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dim); text-align: center; margin-bottom: 32px; }
+
+.hub-container { position: relative; width: 100%; min-height: 520px; }
+
+.hub-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 160px; z-index: 2; background: var(--panel); border: 2px solid var(--blue); border-radius: 16px; padding: 20px 24px; text-align: center; box-shadow: 0 0 30px rgba(45,122,255,0.15); }
+.hub-center:hover { border-color: var(--cyan); }
+.hub-center .node-emoji { font-size: 1.8rem; margin-bottom: 8px; }
+.hub-center .node-name { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.hub-center .node-detail { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--cyan); }
+
+.spoke { position: absolute; z-index: 2; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; min-width: 130px; max-width: 150px; text-align: center; transition: border-color 0.2s; }
+.spoke:hover { border-color: var(--cyan); }
+.spoke .node-emoji { font-size: 1.2rem; margin-bottom: 6px; }
+.spoke .node-name { font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.spoke .node-detail { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: var(--dim); line-height: 1.4; }
+
+.spoke-badge { display: inline-block; border-radius: 4px; padding: 2px 6px; font-size: 0.58rem; font-weight: 700; margin-top: 4px; letter-spacing: 0.05em; }
+.badge-critical { background: rgba(255,77,106,0.12); color: var(--red); border: 1px solid rgba(255,77,106,0.3); }
+.badge-money { background: rgba(0,229,160,0.12); color: var(--green); border: 1px solid rgba(0,229,160,0.3); }
+.badge-async { background: rgba(255,140,66,0.12); color: var(--orange); border: 1px solid rgba(255,140,66,0.3); }
+.badge-data { background: rgba(0,212,255,0.12); color: var(--cyan); border: 1px solid rgba(0,212,255,0.3); }
+.badge-core { background: rgba(45,122,255,0.12); color: var(--blue); border: 1px solid rgba(45,122,255,0.3); }
+
+.hub-svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+.info-panels { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-top: 24px; }
+.info-panel { background: rgba(0,212,255,0.05); border: 1px solid rgba(0,212,255,0.2); border-radius: 10px; padding: 14px 18px; flex: 1; min-width: 200px; max-width: 380px; }
+.info-panel-title { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--cyan); margin-bottom: 8px; }
+.info-panel-items { display: flex; flex-wrap: wrap; gap: 6px; }
+.info-tag { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 3px 8px; font-size: 0.6rem; color: var(--text); }
+
+.callout { background: rgba(0,212,255,0.05); border: 1px solid rgba(0,212,255,0.2); border-radius: 10px; padding: 12px 18px; font-size: 0.72rem; color: var(--text); text-align: center; margin-top: 16px; }
+.callout strong { color: var(--cyan); }
+
+.legend { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-top: 28px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.65rem; color: var(--dim); letter-spacing: 0.05em; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.anim-1 { animation: fadeUp 0.5s ease both; animation-delay: 0.1s; }
+.anim-2 { animation: fadeUp 0.5s ease both; animation-delay: 0.2s; }
+.anim-3 { animation: fadeUp 0.5s ease both; animation-delay: 0.3s; }
+.anim-4 { animation: fadeUp 0.5s ease both; animation-delay: 0.4s; }
+.anim-5 { animation: fadeUp 0.5s ease both; animation-delay: 0.5s; }
+
+.canvas-controls { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 4px; z-index: 10; }
+.canvas-controls button { width: 36px; height: 36px; border: 1px solid var(--border); background: var(--panel); color: var(--text); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, background 0.2s; }
+.canvas-controls button:hover { border-color: var(--cyan); background: rgba(0,212,255,0.08); }
+#zoom-reset { width: auto; padding: 0 12px; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+  <div id="canvas-container">
+    <div id="canvas" class="wrapper">
+
+      <h1 class="anim-1">SaaS <span class="highlight">Microservices</span> Architecture</h1>
+      <div class="subtitle anim-1">API Gateway &middot; 8 Services &middot; Event-Driven</div>
+
+      <div class="hub-container anim-2">
+        <svg class="hub-svg" id="hub-lines"></svg>
+        <div class="hub-center" id="hub-node">
+          <div class="node-emoji">&#x1F310;</div>
+          <div class="node-name">API Gateway</div>
+          <div class="node-detail">Kong / AWS &middot; 3,200 req/s</div>
+        </div>
+        <div class="spoke" id="spoke-0"><div class="node-emoji">&#x1F512;</div><div class="node-name">Auth Service</div><div class="node-detail">JWT + OAuth2, sessions</div><div class="spoke-badge badge-critical">CRITICAL</div></div>
+        <div class="spoke" id="spoke-1"><div class="node-emoji">&#x1F4B3;</div><div class="node-name">Billing</div><div class="node-detail">Stripe, invoicing, metering</div><div class="spoke-badge badge-money">$$$</div></div>
+        <div class="spoke" id="spoke-2"><div class="node-emoji">&#x1F514;</div><div class="node-name">Notifications</div><div class="node-detail">SES, FCM, Twilio</div><div class="spoke-badge badge-async">ASYNC</div></div>
+        <div class="spoke" id="spoke-3"><div class="node-emoji">&#x1F4CA;</div><div class="node-name">Analytics</div><div class="node-detail">ClickHouse, event tracking</div><div class="spoke-badge badge-data">READ-HEAVY</div></div>
+        <div class="spoke" id="spoke-4"><div class="node-emoji">&#x1F464;</div><div class="node-name">User Service</div><div class="node-detail">CRUD, profiles, RBAC</div><div class="spoke-badge badge-core">POSTGRESQL</div></div>
+        <div class="spoke" id="spoke-5"><div class="node-emoji">&#x1F4E6;</div><div class="node-name">Storage</div><div class="node-detail">S3, file upload, CDN</div><div class="spoke-badge badge-data">BLOB</div></div>
+        <div class="spoke" id="spoke-6"><div class="node-emoji">&#x1F50D;</div><div class="node-name">Search</div><div class="node-detail">Elasticsearch, faceted</div><div class="spoke-badge badge-core">INDEXED</div></div>
+        <div class="spoke" id="spoke-7"><div class="node-emoji">&#x26A1;</div><div class="node-name">WebSocket</div><div class="node-detail">Real-time, presence, collab</div><div class="spoke-badge badge-async">WS</div></div>
+      </div>
+
+      <div class="info-panels anim-4">
+        <div class="info-panel">
+          <div class="info-panel-title">Infrastructure</div>
+          <div class="info-panel-items">
+            <span class="info-tag">Kubernetes (EKS)</span>
+            <span class="info-tag">Terraform</span>
+            <span class="info-tag">GitHub Actions</span>
+            <span class="info-tag">RabbitMQ</span>
+            <span class="info-tag">Kafka</span>
+          </div>
+        </div>
+        <div class="info-panel">
+          <div class="info-panel-title">Observability</div>
+          <div class="info-panel-items">
+            <span class="info-tag">Datadog</span>
+            <span class="info-tag">ELK Stack</span>
+            <span class="info-tag">Sentry</span>
+            <span class="info-tag">OpenTelemetry</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout anim-5">&#x1F504; Services never call each other directly. Sync via <strong>gateway</strong>, async via <strong>message queue</strong>.</div>
+
+      <div class="legend anim-5">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--blue);box-shadow:0 0 6px var(--blue)"></div>Gateway</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cyan);box-shadow:0 0 6px var(--cyan)"></div>Core services</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green);box-shadow:0 0 6px var(--green)"></div>Data services</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--orange);box-shadow:0 0 6px var(--orange)"></div>External integrations</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red);box-shadow:0 0 6px var(--red)"></div>Critical path</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="canvas-controls">
+    <button id="zoom-in" title="Zoom in">+</button>
+    <button id="zoom-reset" title="Reset view">Reset</button>
+    <button id="zoom-out" title="Zoom out">&minus;</button>
+  </div>
+
+<script>
+// Position spokes with trigonometry
+(function() {
+  var hubContainer = document.querySelector('.hub-container');
+  var spokeCount = 8;
+  var radius = 200;
+
+  function positionSpokes() {
+    var containerW = hubContainer.offsetWidth;
+    var containerH = hubContainer.offsetHeight;
+    var cx = containerW / 2;
+    var cy = containerH / 2;
+    var svgEl = document.getElementById('hub-lines');
+    svgEl.innerHTML = '';
+
+    for (var i = 0; i < spokeCount; i++) {
+      var angle = (2 * Math.PI / spokeCount) * i - Math.PI / 2;
+      var spoke = document.getElementById('spoke-' + i);
+      var x = cx + radius * Math.cos(angle);
+      var y = cy + radius * Math.sin(angle);
+      spoke.style.left = (x - spoke.offsetWidth / 2) + 'px';
+      spoke.style.top = (y - spoke.offsetHeight / 2) + 'px';
+
+      var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+      line.setAttribute('x2', x); line.setAttribute('y2', y);
+      line.setAttribute('stroke', 'rgba(45,122,255,0.4)');
+      line.setAttribute('stroke-width', '1.5');
+      line.setAttribute('stroke-dasharray', '4 4');
+      var anim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+      anim.setAttribute('attributeName', 'stroke-dashoffset');
+      anim.setAttribute('from', '0'); anim.setAttribute('to', '-8');
+      anim.setAttribute('dur', '0.6s'); anim.setAttribute('repeatCount', 'indefinite');
+      line.appendChild(anim);
+      svgEl.appendChild(line);
+    }
+  }
+
+  requestAnimationFrame(function() { requestAnimationFrame(positionSpokes); });
+  window.addEventListener('resize', positionSpokes);
+})();
+
+// Infinite Canvas
+(function() {
+  var container = document.getElementById('canvas-container');
+  var canvas = document.getElementById('canvas');
+  var scale = 1, translateX = 0, translateY = 0, isPanning = false, startX, startY;
+  var MIN_SCALE = 0.2, MAX_SCALE = 3, ZOOM_STEP = 0.1;
+
+  function applyTransform() { canvas.style.transform = 'translate(' + translateX + 'px,' + translateY + 'px) scale(' + scale + ')'; }
+  function centerCanvas() {
+    var cw = container.clientWidth, ch = container.clientHeight;
+    var dw = canvas.scrollWidth * scale, dh = canvas.scrollHeight * scale;
+    translateX = Math.max(0, (cw - dw) / 2);
+    translateY = Math.max(20, (ch - dh) / 2);
+    applyTransform();
+  }
+  setTimeout(function() { centerCanvas(); }, 100);
+
+  container.addEventListener('mousedown', function(e) { if (e.button !== 0) return; isPanning = true; startX = e.clientX - translateX; startY = e.clientY - translateY; container.classList.add('grabbing'); });
+  window.addEventListener('mousemove', function(e) { if (!isPanning) return; translateX = e.clientX - startX; translateY = e.clientY - startY; applyTransform(); });
+  window.addEventListener('mouseup', function() { isPanning = false; container.classList.remove('grabbing'); });
+
+  container.addEventListener('touchstart', function(e) { if (e.touches.length === 1) { isPanning = true; startX = e.touches[0].clientX - translateX; startY = e.touches[0].clientY - translateY; } }, { passive: true });
+  container.addEventListener('touchmove', function(e) { if (!isPanning || e.touches.length !== 1) return; translateX = e.touches[0].clientX - startX; translateY = e.touches[0].clientY - startY; applyTransform(); }, { passive: true });
+  container.addEventListener('touchend', function() { isPanning = false; });
+
+  container.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    var rect = container.getBoundingClientRect(), mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top, prevScale = scale;
+    scale = e.deltaY < 0 ? Math.min(MAX_SCALE, scale + ZOOM_STEP) : Math.max(MIN_SCALE, scale - ZOOM_STEP);
+    var ratio = scale / prevScale;
+    translateX = mouseX - ratio * (mouseX - translateX); translateY = mouseY - ratio * (mouseY - translateY);
+    applyTransform();
+  }, { passive: false });
+
+  document.getElementById('zoom-in').addEventListener('click', function() { scale = Math.min(MAX_SCALE, scale + ZOOM_STEP); applyTransform(); });
+  document.getElementById('zoom-out').addEventListener('click', function() { scale = Math.max(MIN_SCALE, scale - ZOOM_STEP); applyTransform(); });
+  document.getElementById('zoom-reset').addEventListener('click', function() { scale = 1; centerCanvas(); });
+
+  window.addEventListener('keydown', function(e) {
+    if (e.key === '=' || e.key === '+') { scale = Math.min(MAX_SCALE, scale + ZOOM_STEP); applyTransform(); }
+    if (e.key === '-') { scale = Math.max(MIN_SCALE, scale - ZOOM_STEP); applyTransform(); }
+    if (e.key === '0') { scale = 1; centerCanvas(); }
+  });
+})();
+</script>
+</body>
+</html>

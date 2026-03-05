@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OAuth 2.0 Authorization Code Flow</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap');
+
+:root {
+  --bg:     #0a0e1a;
+  --panel:  #0f1528;
+  --border: #1e2d4a;
+  --blue:   #2d7aff;
+  --cyan:   #00d4ff;
+  --green:  #00e5a0;
+  --orange: #ff8c42;
+  --red:    #ff4d6a;
+  --text:   #c8d8f0;
+  --dim:    #4a6080;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  min-height: 100vh;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+  padding: 0;
+  justify-content: flex-start;
+  align-items: flex-start;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(45,122,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45,122,255,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#canvas-container { position: fixed; inset: 0; overflow: hidden; cursor: grab; z-index: 1; }
+#canvas-container.grabbing { cursor: grabbing; }
+#canvas { position: absolute; transform-origin: 0 0; }
+.wrapper { position: relative; z-index: 1; width: 100%; max-width: 1100px; overflow-x: auto; min-width: 320px; padding: 40px 20px; }
+
+h1 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: #fff; text-align: center; margin-bottom: 6px; }
+h1 .highlight { color: var(--cyan); }
+.subtitle { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dim); text-align: center; margin-bottom: 32px; }
+
+.flow { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0; width: 100%; }
+
+.step { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; min-width: 110px; max-width: 130px; flex: 1; text-align: center; transition: border-color 0.2s; }
+.step:hover { border-color: var(--cyan); }
+
+.step-number { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; margin: 0 auto 8px; }
+.step-emoji { font-size: 1.2rem; margin-bottom: 6px; }
+.step-name { font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.step-desc { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--dim); line-height: 1.4; }
+
+.step-red .step-number { background: rgba(255,77,106,0.15); border: 1px solid var(--red); color: var(--red); }
+.step-orange .step-number { background: rgba(255,140,66,0.15); border: 1px solid var(--orange); color: var(--orange); }
+.step-blue .step-number { background: rgba(45,122,255,0.15); border: 1px solid var(--blue); color: var(--blue); }
+.step-cyan .step-number { background: rgba(0,212,255,0.15); border: 1px solid var(--cyan); color: var(--cyan); }
+.step-green .step-number { background: rgba(0,229,160,0.15); border: 1px solid var(--green); color: var(--green); }
+
+.flow-arrow { display: flex; align-items: center; justify-content: center; width: 32px; flex-shrink: 0; }
+.flow-arrow-line { width: 32px; height: 2px; background: linear-gradient(to right, var(--dim), var(--blue)); position: relative; }
+.flow-arrow-line::after { content: '\25B6'; position: absolute; right: -8px; top: -7px; color: var(--blue); font-size: 0.65rem; }
+
+.callout { background: rgba(0,212,255,0.05); border: 1px solid rgba(0,212,255,0.2); border-radius: 10px; padding: 12px 18px; font-size: 0.72rem; color: var(--text); text-align: center; margin-top: 24px; max-width: 600px; margin-left: auto; margin-right: auto; }
+.callout strong { color: var(--cyan); }
+
+.legend { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-top: 28px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.65rem; color: var(--dim); letter-spacing: 0.05em; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.anim-1 { animation: fadeUp 0.5s ease both; animation-delay: 0.05s; }
+.anim-2 { animation: fadeUp 0.5s ease both; animation-delay: 0.1s; }
+.anim-3 { animation: fadeUp 0.5s ease both; animation-delay: 0.15s; }
+.anim-4 { animation: fadeUp 0.5s ease both; animation-delay: 0.2s; }
+.anim-5 { animation: fadeUp 0.5s ease both; animation-delay: 0.25s; }
+.anim-6 { animation: fadeUp 0.5s ease both; animation-delay: 0.3s; }
+.anim-7 { animation: fadeUp 0.5s ease both; animation-delay: 0.4s; }
+.anim-8 { animation: fadeUp 0.5s ease both; animation-delay: 0.5s; }
+
+.canvas-controls { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 4px; z-index: 10; }
+.canvas-controls button { width: 36px; height: 36px; border: 1px solid var(--border); background: var(--panel); color: var(--text); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, background 0.2s; }
+.canvas-controls button:hover { border-color: var(--cyan); background: rgba(0,212,255,0.08); }
+#zoom-reset { width: auto; padding: 0 12px; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; }
+
+@media (max-width: 600px) {
+  .flow { flex-direction: column; }
+  .flow-arrow { transform: rotate(90deg); margin: 8px 0; }
+  .step { max-width: 100%; min-width: 0; width: 100%; }
+}
+</style>
+</head>
+<body>
+  <div id="canvas-container">
+    <div id="canvas" class="wrapper">
+
+      <h1 class="anim-1">OAuth 2.0 <span class="highlight">Authorization Code</span> Flow</h1>
+      <div class="subtitle anim-1">Client &rarr; Auth Server &rarr; Token Exchange &rarr; Resource</div>
+
+      <div class="flow">
+        <div class="step step-red anim-1"><div class="step-number">1</div><div class="step-emoji">&#x1F464;</div><div class="step-name">User</div><div class="step-desc">Clicks "Login with Google"</div></div>
+        <div class="flow-arrow anim-2"><div class="flow-arrow-line"></div></div>
+        <div class="step step-red anim-2"><div class="step-number">2</div><div class="step-emoji">&#x1F4BB;</div><div class="step-name">Client App</div><div class="step-desc">Redirects with client_id, scope</div></div>
+        <div class="flow-arrow anim-3"><div class="flow-arrow-line"></div></div>
+        <div class="step step-orange anim-3"><div class="step-number">3</div><div class="step-emoji">&#x1F512;</div><div class="step-name">Auth Server</div><div class="step-desc">Consent screen</div></div>
+        <div class="flow-arrow anim-4"><div class="flow-arrow-line"></div></div>
+        <div class="step step-orange anim-4"><div class="step-number">4</div><div class="step-emoji">&#x21A9;&#xFE0F;</div><div class="step-name">Redirect</div><div class="step-desc">Auth code to redirect_uri</div></div>
+        <div class="flow-arrow anim-5"><div class="flow-arrow-line"></div></div>
+        <div class="step step-blue anim-5"><div class="step-number">5</div><div class="step-emoji">&#x1F504;</div><div class="step-name">Token Exchange</div><div class="step-desc">code + client_secret (server-to-server)</div></div>
+        <div class="flow-arrow anim-6"><div class="flow-arrow-line"></div></div>
+        <div class="step step-blue anim-6"><div class="step-number">6</div><div class="step-emoji">&#x1F3AB;</div><div class="step-name">Access Token</div><div class="step-desc">access_token + refresh_token</div></div>
+        <div class="flow-arrow anim-7"><div class="flow-arrow-line"></div></div>
+        <div class="step step-cyan anim-7"><div class="step-number">7</div><div class="step-emoji">&#x1F4E1;</div><div class="step-name">API Call</div><div class="step-desc">Bearer token in header</div></div>
+        <div class="flow-arrow anim-8"><div class="flow-arrow-line"></div></div>
+        <div class="step step-green anim-8"><div class="step-number">8</div><div class="step-emoji">&#x1F6E1;&#xFE0F;</div><div class="step-name">Resource Server</div><div class="step-desc">Validates, returns data</div></div>
+      </div>
+
+      <div class="callout anim-8">&#x1F512; Step 5 happens <strong>server-to-server</strong>. The client_secret never reaches the browser.</div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red);box-shadow:0 0 6px var(--red)"></div>Client-side</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--orange);box-shadow:0 0 6px var(--orange)"></div>Authorization</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--blue);box-shadow:0 0 6px var(--blue)"></div>Token exchange</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cyan);box-shadow:0 0 6px var(--cyan)"></div>API access</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green);box-shadow:0 0 6px var(--green)"></div>Protected resource</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="canvas-controls">
+    <button id="zoom-in" title="Zoom in">+</button>
+    <button id="zoom-reset" title="Reset view">Reset</button>
+    <button id="zoom-out" title="Zoom out">&minus;</button>
+  </div>
+
+<script>
+(function() {
+  var container = document.getElementById('canvas-container');
+  var canvas = document.getElementById('canvas');
+  var scale = 1, translateX = 0, translateY = 0, isPanning = false, startX, startY;
+  var MIN_SCALE = 0.2, MAX_SCALE = 3, ZOOM_STEP = 0.1;
+
+  function applyTransform() { canvas.style.transform = 'translate(' + translateX + 'px,' + translateY + 'px) scale(' + scale + ')'; }
+  function centerCanvas() {
+    var cw = container.clientWidth, ch = container.clientHeight;
+    var dw = canvas.scrollWidth * scale, dh = canvas.scrollHeight * scale;
+    translateX = Math.max(0, (cw - dw) / 2);
+    translateY = Math.max(20, (ch - dh) / 2);
+    applyTransform();
+  }
+  requestAnimationFrame(function() { requestAnimationFrame(centerCanvas); });
+
+  container.addEventListener('mousedown', function(e) { if (e.button !== 0) return; isPanning = true; startX = e.clientX - translateX; startY = e.clientY - translateY; container.classList.add('grabbing'); });
+  window.addEventListener('mousemove', function(e) { if (!isPanning) return; translateX = e.clientX - startX; translateY = e.clientY - startY; applyTransform(); });
+  window.addEventListener('mouseup', function() { isPanning = false; container.classList.remove('grabbing'); });
+
+  container.addEventListener('touchstart', function(e) { if (e.touches.length === 1) { isPanning = true; startX = e.touches[0].clientX - translateX; startY = e.touches[0].clientY - translateY; } }, { passive: true });
+  container.addEventListener('touchmove', function(e) { if (!isPanning || e.touches.length !== 1) return; translateX = e.touches[0].clientX - startX; translateY = e.touches[0].clientY - startY; applyTransform(); }, { passive: true });
+  container.addEventListener('touchend', function() { isPanning = false; });
+
+  container.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    var rect = container.getBoundingClientRect(), mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top, prevScale = scale;
+    scale = e.deltaY < 0 ? Math.min(MAX_SCALE, scale + ZOOM_STEP) : Math.max(MIN_SCALE, scale - ZOOM_STEP);
+    var ratio = scale / prevScale;
+    translateX = mouseX - ratio * (mouseX - translateX); translateY = mouseY - ratio * (mouseY - translateY);
+    applyTransform();
+  }, { passive: false });
+
+  document.getElementById('zoom-in').addEventListener('click', function() { scale = Math.min(MAX_SCALE, scale + ZOOM_STEP); applyTransform(); });
+  document.getElementById('zoom-out').addEventListener('click', function() { scale = Math.max(MIN_SCALE, scale - ZOOM_STEP); applyTransform(); });
+  document.getElementById('zoom-reset').addEventListener('click', function() { scale = 1; centerCanvas(); });
+
+  window.addEventListener('keydown', function(e) {
+    if (e.key === '=' || e.key === '+') { scale = Math.min(MAX_SCALE, scale + ZOOM_STEP); applyTransform(); }
+    if (e.key === '-') { scale = Math.max(MIN_SCALE, scale - ZOOM_STEP); applyTransform(); }
+    if (e.key === '0') { scale = 1; centerCanvas(); }
+  });
+})();
+</script>
+</body>
+</html>
