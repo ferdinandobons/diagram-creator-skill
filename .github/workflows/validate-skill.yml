@@ -1,0 +1,62 @@
+name: Validate Skill
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check SKILL.md exists
+        run: |
+          if [ ! -f skills/diagram-creator/SKILL.md ]; then
+            echo "ERROR: SKILL.md not found"
+            exit 1
+          fi
+          echo "SKILL.md found"
+
+      - name: Validate frontmatter
+        run: |
+          head -20 skills/diagram-creator/SKILL.md | grep -q "^name:" || { echo "ERROR: Missing 'name' in frontmatter"; exit 1; }
+          head -20 skills/diagram-creator/SKILL.md | grep -q "^description:" || { echo "ERROR: Missing 'description' in frontmatter"; exit 1; }
+          echo "Frontmatter valid"
+
+      - name: Check SKILL.md line count
+        run: |
+          LINES=$(wc -l < skills/diagram-creator/SKILL.md)
+          echo "SKILL.md has $LINES lines"
+          if [ "$LINES" -gt 500 ]; then
+            echo "WARNING: SKILL.md exceeds 500 lines ($LINES). Consider moving content to references/"
+          fi
+
+      - name: Check reference files exist
+        run: |
+          REFS=(
+            "skills/diagram-creator/references/typography-and-colors.md"
+            "skills/diagram-creator/references/themes.md"
+            "skills/diagram-creator/references/topology-layouts.md"
+            "skills/diagram-creator/references/components.md"
+            "skills/diagram-creator/references/canvas.md"
+            "skills/diagram-creator/references/safety-rules.md"
+          )
+          for ref in "${REFS[@]}"; do
+            if [ ! -f "$ref" ]; then
+              echo "ERROR: Missing reference file: $ref"
+              exit 1
+            fi
+          done
+          echo "All reference files present"
+
+      - name: Check plugin.json
+        run: |
+          if [ ! -f .claude-plugin/plugin.json ]; then
+            echo "ERROR: plugin.json not found"
+            exit 1
+          fi
+          python3 -c "import json; json.load(open('.claude-plugin/plugin.json'))" || { echo "ERROR: Invalid JSON in plugin.json"; exit 1; }
+          echo "plugin.json valid"

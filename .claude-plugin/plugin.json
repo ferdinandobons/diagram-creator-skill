@@ -5,14 +5,14 @@
     "url": "https://github.com/ferdinandobons"
   },
   "metadata": {
-    "description": "Turn any input into beautiful, production-ready architecture diagrams — self-contained HTML files with dark theme, animations, and zero dependencies",
+    "description": "Turn any input into beautiful, production-ready architecture diagrams — self-contained HTML files with 5 themes, 8 topologies, infinite canvas, and zero dependencies",
     "version": "1.0.0",
     "repository": "https://github.com/ferdinandobons/diagram-creator-skill"
   },
   "plugins": [
     {
       "name": "diagram-creator",
-      "description": "Generate stunning architecture diagrams from any file type or text description. Supports 4 topologies: nested, left-to-right, hub-and-spoke, timeline.",
+      "description": "Generate stunning architecture diagrams from any file type or text description. 8 topologies (nested, left-to-right, hub-and-spoke, timeline, grid, tree, funnel, comparison), 5 themes, infinite canvas with pan & zoom.",
       "source": "./",
       "strict": false,
       "skills": [

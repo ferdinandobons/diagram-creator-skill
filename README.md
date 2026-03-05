@@ -1,6 +1,15 @@
 # Diagram Creator — Claude Code Skill
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Skill Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](VERSIONS.md)
+[![Topologies](https://img.shields.io/badge/topologies-8-green.svg)](#8-topology-layouts)
+[![Themes](https://img.shields.io/badge/themes-5-purple.svg)](#5-themes)
+
 Turn any input into beautiful, production-ready diagrams on an infinite canvas. Self-contained HTML files with 5 themes, 8 topology layouts, pan & zoom navigation, professional typography, smooth animations, and zero dependencies.
+
+<p align="center">
+  <img src="assets/demo.png" alt="Diagram Creator — SaaS Microservices Architecture example" width="100%">
+</p>
 
 ## What It Does
 
@@ -15,30 +24,9 @@ Give it **literally any file** — or just a sentence — and it generates a pol
 
 The skill reads any file, auto-detects the format, extracts the relevant structure, and picks the best topology and layout. You don't need to reformat your input — just point it at a file and it figures out the rest.
 
-## Supported Input Types
+## Supported Inputs
 
-The skill processes **any file type**. It reads the content, understands the structure, and extracts what matters for the diagram.
-
-| Input | Extensions | How it's processed |
-|---|---|---|
-| **Text description** | — | Used directly as diagram specification |
-| **Markdown** | `.md`, `.mdx` | Extracts structure from headings, lists, tables, relationships |
-| **JSON** | `.json`, `.jsonl`, `.geojson` | Parses key-value structure — keys become nodes, nesting becomes layers |
-| **YAML** | `.yaml`, `.yml` | Same as JSON — hierarchical structure mapped to diagram layers |
-| **Code files** | `.py`, `.ts`, `.js`, `.go`, `.rs`, `.java`, `.rb`, `.php`, `.swift`, `.kt`, `.c`, `.cpp`, `.cs`, `.scala`, `.ex`, `.clj` | Extracts classes, functions, imports, inheritance — diagrams the architecture |
-| **Config files** | `.toml`, `.ini`, `.cfg`, `.env`, `.tf`, `.hcl`, `Dockerfile`, `docker-compose.yml`, `Makefile`, `Procfile`, `.nginx.conf` | Maps services, variables, dependencies, infrastructure |
-| **Data files** | `.csv`, `.tsv`, `.parquet` | Identifies columns as entities, rows as relationships |
-| **Microsoft Office** | `.xlsx`, `.xls`, `.docx`, `.doc`, `.pptx`, `.ppt` | Extracts tables, headings, slide structure, org charts, SmartArt |
-| **API specs** | `.openapi.yaml`, `.swagger.json`, `.graphql`, `.proto`, `.thrift` | Extracts endpoints, types, relationships between services |
-| **Database** | `.sql`, `.prisma`, `.schema`, `.dbml` | Maps tables, columns, foreign keys, relationships |
-| **Infra / CI/CD** | `.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, `bitbucket-pipelines.yml`, `k8s/*.yaml` | Visualizes pipeline stages, deployment flows, service topology |
-| **Documentation** | `.txt`, `.rst`, `.adoc`, `.org`, `.wiki` | Parses as free-form description, extracts structure |
-| **PDF** | `.pdf` | Reads content, extracts core structure to visualize |
-| **Notebook** | `.ipynb` | Extracts code cells, data flow, library dependencies |
-| **Package manifests** | `package.json`, `requirements.txt`, `Cargo.toml`, `go.mod`, `Gemfile`, `pom.xml`, `build.gradle` | Maps dependency trees and relationships |
-| **Architecture docs** | `.drawio`, `.puml`, `.mermaid` | Reads existing diagram specs and re-renders with this design system |
-
-**If it's a file, the skill can diagram it.** Even formats not listed here — the skill reads the content and extracts whatever structure exists.
+Give it **any file or topic** — code, config, data, docs, PDFs, spreadsheets, notebooks, API specs, database schemas, CI/CD pipelines, or just a sentence describing what you want. The skill reads the content, auto-detects the format, extracts the relevant structure, and diagrams it. No reformatting needed.
 
 ## 8 Topology Layouts
 
@@ -136,6 +124,14 @@ Or pass a file directly:
 diagram-creator-skill/
 ├── .claude-plugin/
 │   └── plugin.json              # Marketplace manifest
+├── .github/
+│   ├── FUNDING.yml
+│   ├── ISSUE_TEMPLATE/          # Bug reports, topology requests
+│   ├── PULL_REQUEST_TEMPLATE/   # New topology, skill update, docs
+│   └── workflows/
+│       └── validate-skill.yml   # CI: validates skill structure
+├── assets/
+│   └── demo.png                 # Hero image
 ├── skills/
 │   └── diagram-creator/
 │       ├── SKILL.md             # Core skill instructions
@@ -150,33 +146,24 @@ diagram-creator-skill/
 │           ├── oauth2-flow.md             # Left-to-right example
 │           ├── kubernetes-networking.md   # Nested example
 │           └── saas-microservices.md      # Hub-and-spoke example
-└── README.md
+├── AGENTS.md                    # Guidelines for AI agents
+├── CLAUDE.md                    # Claude Code project config
+├── CONTRIBUTING.md              # How to contribute
+├── LICENSE                      # MIT
+├── README.md
+└── VERSIONS.md                  # Version tracking & changelog
 ```
-
-## Examples
-
-### Nested — Kubernetes Pod Networking
-![Nested topology](examples/screenshots/nested.png)
-
-### Left-to-right — OAuth 2.0 Flow
-![Left-to-right topology](examples/screenshots/left-to-right.png)
-
-### Hub-and-spoke — SaaS Microservices
-![Hub-and-spoke topology](examples/screenshots/hub-and-spoke.png)
-
-### Timeline — Napoleon's Story
-![Timeline topology](examples/screenshots/timeline.png)
 
 ## Contributing
 
 Built by [Ferdinando Bonsegna](https://github.com/ferdinandobons).
 
-**Contributions welcome!** Found a way to improve the skill or want to add a new topology? [Open a PR](https://github.com/ferdinandobons/diagram-creator-skill/pulls).
+**Contributions welcome!** Found a way to improve the skill or want to add a new topology? Check out the [Contributing Guide](CONTRIBUTING.md) or [open a PR](https://github.com/ferdinandobons/diagram-creator-skill/pulls).
 
 1. Fork this repository
 2. Create a feature branch (`git checkout -b feature/new-topology`)
 3. Make your changes
-4. Submit a Pull Request
+4. Submit a Pull Request using the [appropriate template](.github/PULL_REQUEST_TEMPLATE/)
 
 ### Adding a new topology
 
@@ -185,6 +172,8 @@ Built by [Ferdinando Bonsegna](https://github.com/ferdinandobons).
 3. Update the topology table in `SKILL.md`
 4. Test with at least 3 different inputs
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full details.
+
 ## License
 
-MIT
+[MIT](LICENSE)

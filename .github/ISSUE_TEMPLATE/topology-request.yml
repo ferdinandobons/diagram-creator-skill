@@ -1,0 +1,28 @@
+name: Topology Request
+description: Suggest a new diagram topology or layout
+labels: ["enhancement", "topology"]
+body:
+  - type: markdown
+    attributes:
+      value: Suggest a new topology layout for the diagram creator!
+  - type: input
+    id: name
+    attributes:
+      label: Topology name
+      placeholder: "e.g., radial, swim-lane, sankey"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this topology show? When would someone use it?
+    validations:
+      required: true
+  - type: textarea
+    id: examples
+    attributes:
+      label: Example use cases
+      description: List 3+ real-world examples where this topology fits
+    validations:
+      required: true
