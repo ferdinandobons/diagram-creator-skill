@@ -16,13 +16,20 @@ Accept any of these inputs and auto-process them:
 | Input type | How to handle |
 |---|---|
 | **Topic/description** | "Docker networking", "OAuth 2.0 flow" — use directly |
-| **Markdown file** (.md) | Read and extract structure, headings, lists, relationships |
-| **JSON / YAML** (.json, .yaml, .yml) | Parse structure — keys become nodes, nesting becomes layers |
-| **Code files** (.py, .ts, .js, .go, .rs, etc.) | Extract classes, functions, imports — diagram the architecture |
-| **Config files** (.toml, .env, .tf, .dockerfile, docker-compose.yml) | Map services, variables, dependencies |
-| **CSV / data files** (.csv, .tsv) | Identify columns as entities, rows as relationships |
-| **PDF** | Read content, extract the core structure to visualize |
-| **Plain text** (.txt) | Parse as free-form description |
+| **Markdown** (.md, .mdx) | Extract structure from headings, lists, tables, relationships |
+| **JSON / YAML** (.json, .yaml, .yml, .jsonl) | Parse structure — keys become nodes, nesting becomes layers |
+| **Code files** (.py, .ts, .js, .go, .rs, .java, .rb, .php, .swift, .kt, .c, .cpp, .cs, .scala, etc.) | Extract classes, functions, imports, inheritance — diagram the architecture |
+| **Config / Infra** (.toml, .ini, .env, .tf, .hcl, Dockerfile, docker-compose.yml, Makefile, nginx.conf) | Map services, variables, dependencies, infrastructure |
+| **API specs** (.openapi.yaml, .swagger.json, .graphql, .proto) | Extract endpoints, types, service relationships |
+| **Database schemas** (.sql, .prisma, .dbml) | Map tables, columns, foreign keys, relationships |
+| **CI/CD pipelines** (.github/workflows/*.yml, .gitlab-ci.yml, Jenkinsfile) | Visualize pipeline stages and deployment flows |
+| **Data files** (.csv, .tsv, .xlsx) | Identify columns as entities, rows as relationships |
+| **Package manifests** (package.json, requirements.txt, Cargo.toml, go.mod, pom.xml) | Map dependency trees |
+| **Existing diagrams** (.drawio, .puml, .mermaid) | Read spec and re-render with this design system |
+| **PDF / Docs** (.pdf, .txt, .rst, .adoc) | Read content, extract core structure |
+| **Notebooks** (.ipynb) | Extract code cells, data flow, library dependencies |
+
+**If it's a file, this skill can diagram it.** For formats not listed, read the content and extract whatever structure exists.
 
 When receiving a file path, read the file, detect the extension, and intelligently extract what matters for the diagram. Don't ask the user to reformat — figure it out.
 

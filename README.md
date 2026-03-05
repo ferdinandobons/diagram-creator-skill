@@ -2,13 +2,9 @@
 
 Turn any input into beautiful, production-ready diagrams on an infinite canvas. Self-contained HTML files with 5 themes, 8 topology layouts, pan & zoom navigation, professional typography, smooth animations, and zero dependencies.
 
-Built by [Ferdinando Bons](https://github.com/ferdinandobons).
-
-**Contributions welcome!** Found a way to improve the skill or want to add a new topology? [Open a PR](#contributing).
-
 ## What It Does
 
-Give it a topic, a description, or **any file** — and it generates a polished architecture diagram as a single `.html` file you can open directly in your browser.
+Give it **literally any file** — or just a sentence — and it generates a polished diagram as a single `.html` file you can open directly in your browser. No accounts, no setup, no dependencies.
 
 ```
 "Create a diagram of OAuth 2.0 flow"          → diagram-oauth2-flow.html
@@ -17,18 +13,31 @@ Give it a topic, a description, or **any file** — and it generates a polished 
 "Turn this business plan into a visual schema" → diagram-business-plan.html
 ```
 
+The skill reads any file, auto-detects the format, extracts the relevant structure, and picks the best topology and layout. You don't need to reformat your input — just point it at a file and it figures out the rest.
+
 ## Supported Input Types
 
-| Input | How it's processed |
-|---|---|
-| **Text description** | Used directly as diagram specification |
-| **Markdown** (.md) | Extracts structure from headings, lists, relationships |
-| **JSON / YAML** (.json, .yaml) | Parses structure — keys become nodes, nesting becomes layers |
-| **Code files** (.py, .ts, .js, .go, etc.) | Extracts classes, functions, imports — diagrams the architecture |
-| **Config files** (.toml, .env, .tf, docker-compose.yml) | Maps services, variables, dependencies |
-| **CSV** (.csv) | Identifies entities and relationships from columns |
-| **PDF** (.pdf) | Reads content, extracts core structure |
-| **Plain text** (.txt) | Parses as free-form description |
+The skill processes **any file type**. It reads the content, understands the structure, and extracts what matters for the diagram.
+
+| Input | Extensions | How it's processed |
+|---|---|---|
+| **Text description** | — | Used directly as diagram specification |
+| **Markdown** | `.md`, `.mdx` | Extracts structure from headings, lists, tables, relationships |
+| **JSON** | `.json`, `.jsonl`, `.geojson` | Parses key-value structure — keys become nodes, nesting becomes layers |
+| **YAML** | `.yaml`, `.yml` | Same as JSON — hierarchical structure mapped to diagram layers |
+| **Code files** | `.py`, `.ts`, `.js`, `.go`, `.rs`, `.java`, `.rb`, `.php`, `.swift`, `.kt`, `.c`, `.cpp`, `.cs`, `.scala`, `.ex`, `.clj` | Extracts classes, functions, imports, inheritance — diagrams the architecture |
+| **Config files** | `.toml`, `.ini`, `.cfg`, `.env`, `.tf`, `.hcl`, `Dockerfile`, `docker-compose.yml`, `Makefile`, `Procfile`, `.nginx.conf` | Maps services, variables, dependencies, infrastructure |
+| **Data files** | `.csv`, `.tsv`, `.xlsx`, `.parquet` | Identifies columns as entities, rows as relationships |
+| **API specs** | `.openapi.yaml`, `.swagger.json`, `.graphql`, `.proto`, `.thrift` | Extracts endpoints, types, relationships between services |
+| **Database** | `.sql`, `.prisma`, `.schema`, `.dbml` | Maps tables, columns, foreign keys, relationships |
+| **Infra / CI/CD** | `.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, `bitbucket-pipelines.yml`, `k8s/*.yaml` | Visualizes pipeline stages, deployment flows, service topology |
+| **Documentation** | `.txt`, `.rst`, `.adoc`, `.org`, `.wiki` | Parses as free-form description, extracts structure |
+| **PDF** | `.pdf` | Reads content, extracts core structure to visualize |
+| **Notebook** | `.ipynb` | Extracts code cells, data flow, library dependencies |
+| **Package manifests** | `package.json`, `requirements.txt`, `Cargo.toml`, `go.mod`, `Gemfile`, `pom.xml`, `build.gradle` | Maps dependency trees and relationships |
+| **Architecture docs** | `.drawio`, `.puml`, `.mermaid` | Reads existing diagram specs and re-renders with this design system |
+
+**If it's a file, the skill can diagram it.** Even formats not listed here — the skill reads the content and extracts whatever structure exists.
 
 ## 8 Topology Layouts
 
@@ -108,6 +117,8 @@ Once installed, just ask Claude naturally:
 "Turn this business plan into a schema"
 "Diagram the OAuth 2.0 flow"
 "Make a timeline of the deployment pipeline"
+"Show me an org chart from this team spreadsheet"
+"Create a sales funnel from this data"
 ```
 
 Or pass a file directly:
@@ -115,6 +126,7 @@ Or pass a file directly:
 ```
 "Diagram this file: /path/to/architecture.md"
 "Visualize /path/to/docker-compose.yml"
+"Turn /path/to/schema.prisma into a diagram"
 ```
 
 ## Skill Structure
@@ -128,7 +140,7 @@ diagram-creator-skill/
 │       ├── SKILL.md             # Core skill instructions
 │       ├── references/
 │       │   ├── typography-and-colors.md   # Fonts, palette, background
-│       │   ├── themes.md                  # 5 color themes (dark, light, corporate, neon, minimal)
+│       │   ├── themes.md                  # 5 color themes
 │       │   ├── topology-layouts.md        # Layout rules for all 8 topologies
 │       │   ├── components.md              # Cards, badges, callouts, animations
 │       │   ├── canvas.md                  # Infinite canvas with pan & zoom
@@ -155,6 +167,10 @@ diagram-creator-skill/
 ![Timeline topology](examples/screenshots/timeline.png)
 
 ## Contributing
+
+Built by [Ferdinando Bonsegna](https://github.com/ferdinandobons).
+
+**Contributions welcome!** Found a way to improve the skill or want to add a new topology? [Open a PR](https://github.com/ferdinandobons/diagram-creator-skill/pulls).
 
 1. Fork this repository
 2. Create a feature branch (`git checkout -b feature/new-topology`)
