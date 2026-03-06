@@ -121,14 +121,27 @@ Place this at the end of the `<script>` block, after any topology-specific JS (l
     const ch = container.clientHeight;
     const dw = canvas.scrollWidth * scale;
     const dh = canvas.scrollHeight * scale;
-    translateX = Math.max(0, (cw - dw) / 2);
+    translateX = (cw - dw) / 2;
     translateY = Math.max(20, (ch - dh) / 2);
     applyTransform();
   }
 
-  // Initial centering after content renders
+  // Fit entire diagram into the viewport, scaling down if needed
+  function fitToView() {
+    const cw = container.clientWidth;
+    const ch = container.clientHeight;
+    const dw = canvas.scrollWidth;
+    const dh = canvas.scrollHeight;
+    const scaleX = (cw - 40) / dw;
+    const scaleY = (ch - 40) / dh;
+    scale = Math.min(scaleX, scaleY, 1);
+    scale = Math.max(scale, MIN_SCALE);
+    centerCanvas();
+  }
+
+  // Initial fit after content renders
   requestAnimationFrame(() => {
-    requestAnimationFrame(centerCanvas);
+    requestAnimationFrame(fitToView);
   });
 
   // Pan — mouse
@@ -204,15 +217,14 @@ Place this at the end of the `<script>` block, after any topology-specific JS (l
   });
 
   document.getElementById('zoom-reset').addEventListener('click', () => {
-    scale = 1;
-    centerCanvas();
+    fitToView();
   });
 
   // Keyboard shortcuts
   window.addEventListener('keydown', (e) => {
     if (e.key === '=' || e.key === '+') { scale = Math.min(MAX_SCALE, scale + ZOOM_STEP); applyTransform(); }
     if (e.key === '-') { scale = Math.max(MIN_SCALE, scale - ZOOM_STEP); applyTransform(); }
-    if (e.key === '0') { scale = 1; centerCanvas(); }
+    if (e.key === '0') { fitToView(); }
   });
 
 })();
@@ -224,8 +236,8 @@ Place this at the end of the `<script>` block, after any topology-specific JS (l
 - **Zoom**: scroll wheel zooms toward cursor position
 - **Touch**: single-finger drag to pan (mobile/tablet)
 - **Buttons**: +/−/Reset controls in bottom-right corner
-- **Keyboard**: `+` zoom in, `-` zoom out, `0` reset view
-- **Initial state**: diagram is centered in the viewport at scale 1
+- **Keyboard**: `+` zoom in, `-` zoom out, `0` fit to view
+- **Initial state**: diagram is auto-scaled to fit entirely within the viewport (scales down if content is wider/taller than viewport, stays at scale 1 if it fits)
 
 ## Integration Notes
 

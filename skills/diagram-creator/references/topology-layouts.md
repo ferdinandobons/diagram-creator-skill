@@ -84,12 +84,15 @@ Sequential horizontal flow.
 ```css
 display: flex;
 flex-direction: row;
-flex-wrap: wrap;            /* REQUIRED for narrow screens */
+flex-wrap: nowrap;             /* never wrap — infinite canvas handles navigation */
 align-items: center;
 justify-content: center;
 gap: 0;
-width: 100%;
+width: max-content;           /* container grows to fit all steps */
 ```
+
+### Canvas sizing for left-to-right
+Set `#canvas` to `width: max-content` (instead of the default `width: 100%; max-width: Xpx` used by other topologies). This lets the canvas expand to the full flow width. The `fitToView()` function auto-scales to show everything on load.
 
 ### Each step box
 ```css
@@ -97,9 +100,8 @@ background: var(--panel);
 border: 1px solid var(--border);
 border-radius: 12px;
 padding: 16px 20px;
-min-width: 120px;
+flex: 0 1 auto;               /* size from content, not equal distribution */
 max-width: 160px;
-flex: 1;
 text-align: center;
 transition: border-color 0.2s;
 ```
@@ -107,18 +109,18 @@ Hover: `border-color: var(--cyan)`
 
 ### Step count scaling
 
-Adjust step boxes, arrows, and canvas width based on the number of steps to prevent premature wrapping on desktop viewports. Apply automatically.
+Adjust step boxes and arrows based on the number of steps. Canvas width is handled automatically via `width: max-content`. Apply these rules automatically.
 
-| Step count | Step max-width | Step padding | Arrow width | Canvas max-width |
-|---|---|---|---|---|
-| 2-4 steps | 160px | 16px 20px | 32px | 900px |
-| 5-6 steps | 130px | 14px 16px | 24px | 1200px |
-| 7-8 steps | 110px | 12px 14px | 20px | 1400px |
-| 9+ steps | 100px | 10px 12px | 16px | 1600px |
+| Step count | Step max-width | Step padding | Arrow width |
+|---|---|---|---|
+| 2-4 steps | 160px | 16px 20px | 32px |
+| 5-6 steps | 130px | 14px 16px | 24px |
+| 7-8 steps | 110px | 12px 14px | 20px |
+| 9+ steps | 100px | 10px 12px | 16px |
 
 For 7+ steps, also reduce `font-size` to `0.72rem` on `.node-name` and `0.6rem` on `.node-detail`.
 
-**Canvas max-width override:** set `max-width` on `#canvas` to the value from the table above. This overrides the default canvas width for left-to-right topology only.
+Text inside step boxes uses `word-break: break-word` — text wraps naturally within the box instead of overflowing.
 
 ### Arrow between steps
 The arrow container MUST use `flex-direction: row` so the line and arrowhead sit side by side horizontally:

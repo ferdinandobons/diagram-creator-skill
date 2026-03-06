@@ -11,6 +11,8 @@ Never let content escape the wrapper horizontally.
 ## 2. Flex Wrap Required
 All flex rows must have `flex-wrap: wrap` unless the total content width is provably under 320px.
 
+**Exception:** Left-to-right flow containers use `flex-wrap: nowrap` with `width: max-content`. The infinite canvas (pan & zoom) handles navigation — wrapping breaks the sequential flow.
+
 ## 3. No Absolute Positioning for Repeated Elements
 Never use `position: absolute` to place cards, nodes, or labels — UNLESS the topology is hub-and-spoke (which requires it for coordinate calculation).
 For nested and left-to-right: use flex/grid only.
@@ -41,16 +43,16 @@ white-space: nowrap;
 Apply automatically based on declared node count.
 
 ## 7b. Step Count Scaling (left-to-right only)
-Left-to-right flows must scale step boxes, arrows, and canvas width to prevent wrapping on desktop. See `topology-layouts.md` for the full scaling table. Summary:
+Left-to-right flows scale step boxes and arrows based on step count. Canvas width is automatic (`width: max-content`). See `topology-layouts.md` for the full scaling table. Summary:
 
-| Step count | Step max-width | Arrow width | Canvas max-width |
-|---|---|---|---|
-| 2-4 steps | 160px | 32px | 900px |
-| 5-6 steps | 130px | 24px | 1200px |
-| 7-8 steps | 110px | 20px | 1400px |
-| 9+ steps | 100px | 16px | 1600px |
+| Step count | Step max-width | Arrow width |
+|---|---|---|
+| 2-4 steps | 160px | 32px |
+| 5-6 steps | 130px | 24px |
+| 7-8 steps | 110px | 20px |
+| 9+ steps | 100px | 16px |
 
-Apply automatically based on declared step count. The canvas max-width override applies to `#canvas` for left-to-right topology only.
+Apply automatically. Use `flex: 0 1 auto` on step boxes (content-driven sizing). Set `#canvas` to `width: max-content` for left-to-right topology.
 
 ## 8. SVG Restriction
 SVG lines are for hub-and-spoke topology ONLY.
