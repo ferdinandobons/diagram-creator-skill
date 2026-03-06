@@ -52,11 +52,11 @@ jobs:
           done
           echo "All reference files present"
 
-      - name: Check plugin.json
+      - name: Check marketplace.json
         run: |
-          if [ ! -f .claude-plugin/plugin.json ]; then
-            echo "ERROR: plugin.json not found"
+          if [ ! -f .claude-plugin/marketplace.json ]; then
+            echo "ERROR: marketplace.json not found"
             exit 1
           fi
-          python3 -c "import json; json.load(open('.claude-plugin/plugin.json'))" || { echo "ERROR: Invalid JSON in plugin.json"; exit 1; }
-          echo "plugin.json valid"
+          python3 -c "import json; json.load(open('.claude-plugin/marketplace.json'))" || { echo "ERROR: Invalid JSON in marketplace.json"; exit 1; }
+          echo "marketplace.json valid"
