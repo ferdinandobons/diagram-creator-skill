@@ -38,40 +38,52 @@ If the input is genuinely ambiguous (no clear structure to extract), ask clarify
 
 ## Pre-generation Questions
 
-Always ask these questions before generating, unless the answer is completely obvious from the input. Ask them all in one message. Present every question as a **multiple-choice list** so the user can simply pick an option.
+Always ask these questions before generating, unless the answer is completely obvious from the input. **Ask one question at a time** — wait for the user's answer before moving to the next. Present every question as a **numbered list** so the user can simply reply with a number.
 
 Skip a question ONLY when the answer is unambiguous — e.g., "diagram of Docker bridge networking" makes topology (nested) and detail level (medium) obvious. When in doubt, ask.
 
-**Questions (single-choice — user picks exactly one option per question):**
+**Question flow (one at a time, in this order):**
 
 1. **What to visualize?** (skip only if input is already specific)
-   - ( ) Option A — [describe interpretation 1 of the input]
-   - ( ) Option B — [describe interpretation 2]
-   - ( ) Other — tell me what you need
+   Present 2-3 interpretations of the input as numbered options, plus an "Other" option. Tailor the options to what the user actually asked — don't use generic placeholders.
+   ```
+   What do you want to visualize?
+     1) [interpretation A]
+     2) [interpretation B]
+     3) Other — describe below
+   → Reply with the number:
+   ```
 
-2. **Layout?** (ask only if you're genuinely in doubt between 2+ topologies — otherwise choose automatically in Step 0)
-   - ( ) Nested — layers wrapping layers (Docker, K8s, VPC)
-   - ( ) Left-to-right — sequential flow (OAuth, CI/CD, user journey)
-   - ( ) Hub-and-spoke — central node + surrounding services
-   - ( ) Timeline — vertical sequence of events/steps
-   - ( ) Grid — matrix/table comparison
-   - ( ) Tree — org chart, file tree, decision tree
-   - ( ) Funnel — progressive narrowing, conversion stages
-   - ( ) Comparison — side-by-side 2-3 options
+2. **Layout?** (skip if only one topology realistically fits — choose automatically in Step 0)
+   Only list the 2-3 topologies that could realistically fit, not all 8. Adapt options based on the previous answer.
+   ```
+   Layout?
+     1) Left-to-right — sequential flow
+     2) Timeline — vertical step sequence
+   → Reply with the number:
+   ```
 
 3. **Detail level?**
-   - ( ) High-level — main entities only, no technical details, understand in 5 seconds
-   - ( ) Medium — entities with key metadata, labeled connections (default)
-   - ( ) Detailed — everything: sub-components, configs, full technical reference
+   ```
+   Detail level?
+     1) High-level — main entities only, understand in 5 seconds
+     2) Medium — entities with key info, labeled connections (default)
+     3) Detailed — full technical breakdown, all metadata
+   → Reply with the number (default: 2):
+   ```
 
 4. **Theme?**
-   - ( ) Dark — technical diagrams, dev docs (default)
-   - ( ) Light — presentations, documentation
-   - ( ) Corporate — business, pitch decks
-   - ( ) Neon — creative, cyberpunk, vibrant
-   - ( ) Minimal — clean, simple
+   ```
+   Theme?
+     1) Dark (default)
+     2) Light
+     3) Corporate
+     4) Neon
+     5) Minimal
+   → Reply with the number (default: 1):
+   ```
 
-Once you have the answers, proceed autonomously through all remaining steps without further questions.
+Once you have all the answers, proceed autonomously through all remaining steps without further questions.
 
 ## Step 0 — Choose the Topology
 
