@@ -38,13 +38,38 @@ If the input is genuinely ambiguous (no clear structure to extract), ask clarify
 
 ## Pre-generation Questions
 
-When the input doesn't make the answer obvious, ask up to 3 quick questions before generating. Ask them all in one message, not one at a time. If the input is already clear (e.g., "diagram of Docker bridge networking"), skip questions and proceed.
+Always ask these questions before generating, unless the answer is completely obvious from the input. Ask them all in one message. Present every question as a **multiple-choice list** so the user can simply pick an option.
 
-Questions to consider (ask only what's needed):
+Skip a question ONLY when the answer is unambiguous — e.g., "diagram of Docker bridge networking" makes topology (nested) and detail level (medium) obvious. When in doubt, ask.
 
-1. **What to visualize?** — "What's the main thing you want this diagram to show?" (only if input is vague like "make a diagram")
-2. **Topology preference?** — "Which layout fits best?" Offer the options with one-line descriptions. (only if multiple topologies could work equally well)
-3. **Theme?** — "Any theme preference? dark (default), light, corporate, neon, minimal" (only if context doesn't make it obvious)
+**Questions (single-choice — user picks exactly one option per question):**
+
+1. **What to visualize?** (skip only if input is already specific)
+   - ( ) Option A — [describe interpretation 1 of the input]
+   - ( ) Option B — [describe interpretation 2]
+   - ( ) Other — tell me what you need
+
+2. **Layout?** (ask only if you're genuinely in doubt between 2+ topologies — otherwise choose automatically in Step 0)
+   - ( ) Nested — layers wrapping layers (Docker, K8s, VPC)
+   - ( ) Left-to-right — sequential flow (OAuth, CI/CD, user journey)
+   - ( ) Hub-and-spoke — central node + surrounding services
+   - ( ) Timeline — vertical sequence of events/steps
+   - ( ) Grid — matrix/table comparison
+   - ( ) Tree — org chart, file tree, decision tree
+   - ( ) Funnel — progressive narrowing, conversion stages
+   - ( ) Comparison — side-by-side 2-3 options
+
+3. **Detail level?**
+   - ( ) High-level — main entities only, no technical details, understand in 5 seconds
+   - ( ) Medium — entities with key metadata, labeled connections (default)
+   - ( ) Detailed — everything: sub-components, configs, full technical reference
+
+4. **Theme?**
+   - ( ) Dark — technical diagrams, dev docs (default)
+   - ( ) Light — presentations, documentation
+   - ( ) Corporate — business, pitch decks
+   - ( ) Neon — creative, cyberpunk, vibrant
+   - ( ) Minimal — clean, simple
 
 Once you have the answers, proceed autonomously through all remaining steps without further questions.
 
@@ -68,10 +93,15 @@ Pick exactly one topology based on what fits the content best:
 Before writing HTML, plan these elements in your thinking:
 
 - **Topic**: one sentence describing what the diagram shows
+- **Detail level**: choose one of three levels. Default to **medium** unless context suggests otherwise:
+  - **High-level** — Only the main entities of the system. Aggregate similar entities into single boxes (e.g., "Backend Services" instead of listing 10 microservices). No metadata in boxes — just name and role. Minimal connection labels. No callouts, badges, or notes. The viewer should understand the structure in 5 seconds.
+  - **Medium** (default) — The entities needed to understand how the system works, without sub-components. Each box gets 1-2 metadata relevant to the domain (infra: port and protocol; org chart: role and team; flow: input/output of each step). Label connections where it adds clarity. Callouts only for non-obvious key concepts. The viewer who knows the domain should understand the diagram without further explanation.
+  - **Detailed** — Everything: sub-components, configurations, technical notes. All relevant metadata per box (ports, protocols, versions, env vars, states). Badges, explanatory callouts, side notes. Goal: complete technical reference for people working on the system.
+  How to choose: (1) If the user specifies a level explicitly, use it. (2) If context clarifies intent — a presentation implies high-level, a technical doc for the team implies detailed — match it. (3) Otherwise default to medium. (4) If the chosen level produces too many elements for the topology, aggregate entities into groups rather than changing level or topology.
 - **Layers/Steps**: each level with name, description, and accent color
-- **Nodes**: each box with emoji, name, and relevant metadata (IPs, ports, roles, dates — whatever fits the domain)
-- **Connections**: what each arrow represents
-- **Special Components**: callout boxes, badges, info panels
+- **Nodes**: each box with emoji, name, and metadata density matching the detail level above
+- **Connections**: what each arrow represents (label density matches detail level)
+- **Special Components**: callout boxes, badges, info panels (reduce or skip for high-level)
 - **Legend Entries**: one per accent color used
 
 ## Step 1.5 — Choose the Theme

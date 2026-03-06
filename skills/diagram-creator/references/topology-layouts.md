@@ -106,9 +106,19 @@ transition: border-color 0.2s;
 Hover: `border-color: var(--cyan)`
 
 ### Arrow between steps
-- `width: 32px`, `height: 2px`
-- `background: linear-gradient(to right, var(--dim), var(--blue))`
-- `::after` arrowhead: `content: '▶'`, `color: var(--blue)`
+The arrow container MUST use `flex-direction: row` so the line and arrowhead sit side by side horizontally:
+```css
+.flow-arrow {
+  display: flex;
+  flex-direction: row;   /* REQUIRED — keeps line and head on same axis */
+  align-items: center;
+  width: 32px;
+  flex-shrink: 0;
+}
+```
+- Line: `width: 24px`, `height: 2px`, `background: linear-gradient(to right, var(--dim), var(--blue))`
+- Arrowhead: inline element with `content: '▶'`, `color: var(--blue)`, `font-size: 0.7rem`
+- NEVER use `flex-direction: column` — it stacks the arrowhead below the line
 
 ### Responsive
 ```css
