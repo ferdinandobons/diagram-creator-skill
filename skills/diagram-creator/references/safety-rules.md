@@ -31,7 +31,7 @@ text-overflow: ellipsis;
 white-space: nowrap;
 ```
 
-## 7. Node Count Scaling
+## 7. Node Count Scaling (nested, hub-and-spoke, grid, tree, funnel, comparison)
 | Node count | max-width | font-size | Emoji |
 |---|---|---|---|
 | 2-4 nodes | 180px | default | visible |
@@ -39,6 +39,18 @@ white-space: nowrap;
 | 7+ nodes | 130px | 0.72rem | hidden |
 
 Apply automatically based on declared node count.
+
+## 7b. Step Count Scaling (left-to-right only)
+Left-to-right flows must scale step boxes, arrows, and canvas width to prevent wrapping on desktop. See `topology-layouts.md` for the full scaling table. Summary:
+
+| Step count | Step max-width | Arrow width | Canvas max-width |
+|---|---|---|---|
+| 2-4 steps | 160px | 32px | 900px |
+| 5-6 steps | 130px | 24px | 1200px |
+| 7-8 steps | 110px | 20px | 1400px |
+| 9+ steps | 100px | 16px | 1600px |
+
+Apply automatically based on declared step count. The canvas max-width override applies to `#canvas` for left-to-right topology only.
 
 ## 8. SVG Restriction
 SVG lines are for hub-and-spoke topology ONLY.

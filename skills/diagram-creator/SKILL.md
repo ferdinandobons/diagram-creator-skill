@@ -110,7 +110,7 @@ Before writing HTML, plan these elements in your thinking:
   - **Medium** (default) — The entities needed to understand how the system works, without sub-components. Each box gets 1-2 metadata relevant to the domain (infra: port and protocol; org chart: role and team; flow: input/output of each step). Label connections where it adds clarity. Callouts only for non-obvious key concepts. The viewer who knows the domain should understand the diagram without further explanation.
   - **Detailed** — Everything: sub-components, configurations, technical notes. All relevant metadata per box (ports, protocols, versions, env vars, states). Badges, explanatory callouts, side notes. Goal: complete technical reference for people working on the system.
   How to choose: (1) If the user specifies a level explicitly, use it. (2) If context clarifies intent — a presentation implies high-level, a technical doc for the team implies detailed — match it. (3) Otherwise default to medium. (4) If the chosen level produces too many elements for the topology, aggregate entities into groups rather than changing level or topology.
-- **Layers/Steps**: each level with name, description, and accent color
+- **Layers/Steps**: each level with name, description, and accent color. For left-to-right topology, count the steps and apply the step count scaling table from `references/topology-layouts.md` to set step max-width, arrow width, and canvas max-width accordingly
 - **Nodes**: each box with emoji, name, and metadata density matching the detail level above
 - **Connections**: what each arrow represents (label density matches detail level)
 - **Special Components**: callout boxes, badges, info panels (reduce or skip for high-level)

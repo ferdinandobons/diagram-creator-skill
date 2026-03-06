@@ -105,6 +105,21 @@ transition: border-color 0.2s;
 ```
 Hover: `border-color: var(--cyan)`
 
+### Step count scaling
+
+Adjust step boxes, arrows, and canvas width based on the number of steps to prevent premature wrapping on desktop viewports. Apply automatically.
+
+| Step count | Step max-width | Step padding | Arrow width | Canvas max-width |
+|---|---|---|---|---|
+| 2-4 steps | 160px | 16px 20px | 32px | 900px |
+| 5-6 steps | 130px | 14px 16px | 24px | 1200px |
+| 7-8 steps | 110px | 12px 14px | 20px | 1400px |
+| 9+ steps | 100px | 10px 12px | 16px | 1600px |
+
+For 7+ steps, also reduce `font-size` to `0.72rem` on `.node-name` and `0.6rem` on `.node-detail`.
+
+**Canvas max-width override:** set `max-width` on `#canvas` to the value from the table above. This overrides the default canvas width for left-to-right topology only.
+
 ### Arrow between steps
 The arrow container MUST use `flex-direction: row` so the line and arrowhead sit side by side horizontally:
 ```css
@@ -112,11 +127,11 @@ The arrow container MUST use `flex-direction: row` so the line and arrowhead sit
   display: flex;
   flex-direction: row;   /* REQUIRED — keeps line and head on same axis */
   align-items: center;
-  width: 32px;
+  width: 32px;           /* default — adjust per step count scaling table */
   flex-shrink: 0;
 }
 ```
-- Line: `width: 24px`, `height: 2px`, `background: linear-gradient(to right, var(--dim), var(--blue))`
+- Line: `width: calc(100% - 8px)`, `height: 2px`, `background: linear-gradient(to right, var(--dim), var(--blue))`
 - Arrowhead: inline element with `content: '▶'`, `color: var(--blue)`, `font-size: 0.7rem`
 - NEVER use `flex-direction: column` — it stacks the arrowhead below the line
 
