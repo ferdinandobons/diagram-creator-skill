@@ -125,7 +125,7 @@ Or pass a file directly:
 ```
 diagram-creator-skill/
 ├── .claude-plugin/
-│   └── plugin.json              # Marketplace manifest
+│   └── marketplace.json         # Marketplace manifest
 ├── .github/
 │   ├── FUNDING.yml
 │   ├── ISSUE_TEMPLATE/          # Bug reports, topology requests
